@@ -30,7 +30,8 @@ function! s:golden_ratio_height()
 endfunction
 
 function! s:window_list()
-  let wl = range(1, winnr('$'))
+  let wl = filter(nvim_list_wins(), 'nvim_win_get_config(v:val)["relative"] == ""')
+  call map(wl, 'nvim_win_get_number(v:val)')
   if g:golden_ratio_exclude_nonmodifiable
     let wl = filter(wl, 'getwinvar(v:val, "&modifiable")')
   endif
@@ -114,12 +115,13 @@ function! s:resize_main_window(window,
 endfunction
 
 function! s:resize_to_golden_ratio()
-  if exists("b:golden_ratio_resizing_ignored") &&
-        \ b:golden_ratio_resizing_ignored
+  if (exists("b:golden_ratio_resizing_ignored") &&
+        \ b:golden_ratio_resizing_ignored)
     return
   endif
 
-  if g:golden_ratio_exclude_nonmodifiable && !&modifiable
+  if (g:golden_ratio_exclude_nonmodifiable && !&modifiable) ||
+        \ nvim_win_get_config(0)["relative"] != ""
     return
   endif
 
